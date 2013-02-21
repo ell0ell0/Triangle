@@ -1,164 +1,158 @@
-var canvas = document.querySelector('#canvas'),
-	readout = document.querySelector('#readout'),
-    context = canvas.getContext('2d');
-    context.canvas.width  = window.innerWidth;
- 	context.canvas.height = window.innerHeight;
+var Triangles = function(iterations, triangleSize, positionChance, colorChance, orientChance) {
 
-var screenX = window.innerWidth;
-var screenY = window.innerHeight;
-var	containerH = screenY/2;
-var containerW = containerH;
+	this.currentIteration = 0;
 
-var size = 50;
+	// set as you please
+	this.iterations = iterations || 100;
+	this.triangleSize = triangleSize || 20;
 
-var conX = Math.round( (screenX/2) - (containerW/2) );
-var conY = Math.round( (screenY/2) - (containerH/2) );
+	// probability of stuff happening
+	this.positionChance = positionChance || 0.1;
+	this.colorChance = colorChance || 0.95;
+	this.orientChance = orientChance || 0.8;
 
-var posChance = 0.9;
-var colorChance = 0.95;
-var orientChance = 0.8;
+	// the colors, duke, the colors
+	this.colors = [
+		{ r: 67, g: 146, b: 42, a: 0.75 },
+		{ r: 99, g: 102, b: 106, a: 0.75 },
+		{ r: 208, g: 208, b: 206, a: 0.75 },
+		{ r: 173, g: 220, b: 145, a: 0.75 },
+		{ r: 219, g: 237, b: 212, a: 0.75 }
+	];
 
-var maxIterations = 100;
-var iteration = 0;
+	// get context and find container widths
+	this.context = document.querySelector('#canvas').getContext('2d');
+	this.context.canvas.width  = window.innerWidth;
+	this.context.canvas.height = window.innerHeight;
+	this.containerWidth = this.containerHeight = this.context.canvas.height/2;
+	this.conX = Math.round( (this.context.canvas.width/2) - (this.containerWidth/2) );
+	this.conX = Math.round( (this.context.canvas.height/2) - (this.containerHeight/2) );
 
-var colors = [
-	{
-		r: 67,
-		g: 146,
-		b: 42,
-		a: 0.75
-	},{
-		r: 99,
-		g: 102,
-		b: 106,
-		a: 0.75
-	},{
-		r: 208,
-		g: 208,
-		b: 206,
-		a: 0.75
-	},{
-		r: 173,
-		g: 220,
-		b: 145,
-		a: 0.75
-	},{
-		r: 219,
-		g: 237,
-		b: 212,
-		a: 0.75
-	}
-];
+};
 
-function createTriangle(posX, posY, color, orientation) {
-	context.save();
-	context.beginPath();
+Triangles.prototype.createTriangle = function(posX, posY, color, orientation) {
+
+	this.context.save();
+	this.context.beginPath();
+
+	var size = this.triangleSize;
 
 	if(orientation == "left") {
-		context.moveTo(posX, posY);
-		context.lineTo( posX - size, posY - size );
-		context.lineTo( posX - size, posY + size );
+		this.context.moveTo( posX, posY );
+		this.context.lineTo( posX - size, posY - size );
+		this.context.lineTo( posX - size, posY + size );
 	} else if(orientation == "up") {
-		context.moveTo(posX, posY);
-		context.lineTo( posX - size, posY - size );
-		context.lineTo( posX + size, posY - size );
+		this.context.moveTo(posX, posY);
+		this.context.lineTo( posX - size, posY - size );
+		this.context.lineTo( posX + size, posY - size );
 	} else if(orientation == "right") {
-		context.moveTo(posX, posY);
-		context.lineTo( posX + size, posY - size );
-		context.lineTo( posX + size, posY + size );
+		this.context.moveTo(posX, posY);
+		this.context.lineTo( posX + size, posY - size );
+		this.context.lineTo( posX + size, posY + size );
 	} else if(orientation == "down") {
-		context.moveTo(posX, posY);
-		context.lineTo( posX - size, posY + size );
-		context.lineTo( posX + size, posY + size );
-	};
+		this.context.moveTo(posX, posY);
+		this.context.lineTo( posX - size, posY + size );
+		this.context.lineTo( posX + size, posY + size );
+	}
 
- 	context.fillStyle = "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
- 	context.fill();
- 	context.closePath();
- 	context.restore();
+	this.context.fillStyle = "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
+	this.context.fill();
+	this.context.closePath();
+	this.context.restore();
 
-}
+};
 
-function logic(posX, posY, color, orientation) {
-	var newPos = choosePos(posX, posY);
-	var newColor = chooseColor(color);
-	var newOrientation = chooseOrientation(orientation);
+Triangles.prototype.logic = function(posX, posY, color, orientation) {
 
-	if(iteration <= maxIterations) {
+	var self = this,
+			newPos = this.choosePos(posX, posY),
+			newColor = this.chooseColor(color),
+			newOrientation = this.chooseOrientation(orientation);
+
+	if(this.currentIteration <= this.iterations) {
+
 		if(newPos.x === posX && newPos.y === posY && newOrientation === orientation) {
 
-				logic(posX, posY, color, orientation);
+				self.logic(posX, posY, color, orientation);
 
 		} else {
-			createTriangle(newPos.x, newPos.y, newColor, newOrientation);
-			iteration += 1;
+
+			this.createTriangle(newPos.x, newPos.y, newColor, newOrientation);
+			this.currentIteration++;
 			window.setTimeout( function(){
-				logic(newPos.x, newPos.y, newColor, newOrientation);
-			}, 5);
+				self.logic(newPos.x, newPos.y, newColor, newOrientation);
+			}, 100);
+
 		}
 	}
-}
+};
 
-function choosePos(posX, posY) {
-	var pos = {
-		x: posX,
-		y: posY
-	}
+Triangles.prototype.choosePos = function(posX, posY) {
 
-	var rando = Math.random();
-	if(rando <= posChance) {
+	var pos = { x: posX, y: posY },
+			diameter = this.triangleSize * 2,
+			rando = Math.random();
+
+	if(rando <= this.positionChance) {
+		console.log('same position');
 		return pos;
 	} else {
 		var ranDir = Math.random();
 		//move left
 		if (ranDir <= 0.25) {
-			if(withinBox(conX, conY, containerW, containerH, pos.x - size*2, pos.y)){
-				pos.x -= size*2;
-			} 
-		} 
+			if(withinBox(this.conX, this.conY, this.containerWidth, this.containerHeight, pos.x - diameter, pos.y)){
+				pos.x -= diameter;
+			}
+		}
 		//move up
 		else if(ranDir > 0.25 && ranDir <= 0.5) {
-			if(withinBox(conX, conY, containerW, containerH, pos.x, pos.y - size*2)){
-				pos.y -= size*2;
-			} 
+			if(withinBox(this.conX, this.conY, this.containerWidth, this.containerHeight, pos.x, pos.y - diameter)){
+				pos.y -= diameter;
+			}
 		}
 		//move right
 		else if(ranDir > 0.5 && ranDir <= 0.75) {
-			if(withinBox(conX, conY, containerW, containerH, pos.x + size*2, pos.y)){
-				pos.x += size*2;
-			} 
+			if(withinBox(this.conX, this.conY, this.containerWidth, this.containerHeight, pos.x + diameter, pos.y)){
+				pos.x += diameter;
+			}
 		}
 		//move down
 		else if(ranDir > 0.75 && ranDir <= 1) {
-			if(withinBox(conX, conY, containerW, containerH, pos.x, pos.y + size*2)){
-				pos.y += size*2;
-			} 
+			if(withinBox(this.conX, this.conY, this.containerWidth, this.containerHeight, pos.x, pos.y + diameter)){
+				pos.y += diameter;
+			}
 		}
+		console.log('new position');
+		console.log(pos);
 		return pos;
 	}
-}
+};
 
-function chooseColor (color) {
-	var tmpColors = colors.slice(0),
-		newColor = tmpColors.pop(),
-		oldColor = color;
+Triangles.prototype.chooseColor = function(color) {
 
-	if (Math.random() <= colorChance) {
+	var tmpColors = this.colors.slice(0),
+			newColor = tmpColors.pop(),
+			oldColor = color;
+
+	if (Math.random() <= this.colorChance) {
 		return oldColor;
 	}
+
 	while (newColor === oldColor) {
-		newColor = tmpColors.pop()
+		newColor = tmpColors.pop();
 		var rand = Math.round(Math.random() * (tmpColors.length - 1));
 		newColor = tmpColors[rand];
 	}
-	return newColor;
-}
 
-function chooseOrientation (orientation) {
+	return newColor;
+
+};
+
+Triangles.prototype.chooseOrientation = function(orientation) {
 	// var rando = Math.random();
 
 	// if(rando <= orientChance) {
-	// 	return orientation;
+	// return orientation;
 	// } else {
 		var randOr = Math.random();
 		//left
@@ -176,33 +170,20 @@ function chooseOrientation (orientation) {
 		//down
 		else if(orientation != "down" && randOr > 0.75 && randOr <= 1) {
 			return "down";
-		} 
+		}
 		else {
 			return orientation;
 		}
 	//}
-}
+};
 
 
 $(document).ready(function() {
 	//create initial seed
-	var startX = conX + Math.round( Math.random() * containerW );
-	var startY = conY + Math.round( Math.random() * containerH );
-	var randC = colors[Math.round( Math.random() * (colors.length - 1) )];
-	var randO = Math.random();
-	var startOrientation;
-	if (randO <= 0.25) {startOrientation = "left"};
-	if (randO > 0.25 && randO <= 0.5) {startOrientation = "up"};
-	if (randO > 0.5 && randO <= 0.75) {startOrientation = "right"};
-	if (randO > 0.75 && randO <= 1) {startOrientation = "down"};
+	//
+	
+	var TRIANGLES = new Triangles();
 
-	logic(startX, startY, randC, startOrientation);
-	logic(startX, startY, colors[0], startOrientation);
-	logic(startX, startY, colors[0], startOrientation);
-	logic(startX, startY, randC, startOrientation);
-	// logic(startX, startY, randC, startOrientation);
-	// logic(startX, startY, randC, startOrientation);
-	// logic(startX, startY, randC, startOrientation);
-	// logic(startX, startY, randC, startOrientation);
-	// logic(startX, startY, randC, startOrientation);
+	TRIANGLES.logic(100, 100, { r: 67, g: 146, b: 42, a: 0.75 }, 'right');
+
 });
