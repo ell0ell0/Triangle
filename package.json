@@ -1,0 +1,30 @@
+{
+  "name": "Triangles",
+  "description": "It's triangles!",
+  "version": "0.1.0",
+  "homepage": "http://consumerfinance.gov",
+  "author": {
+    "name": "Consumer Financial Protection Bureau",
+    "email": "christopher.contolini@cfpb.gov",
+    "url": "http://consumerfinance.gov"
+  },
+  "licenses": [
+    {
+      "type": "Apache 2.0"
+    }
+  ],
+  "engines": {
+    "node": "~0.4"
+  },
+  "scripts": {
+    "test": "grunt jasmine"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "0.1.1rc6",
+    "grunt-contrib-connect": "0.1.0",
+    "grunt-contrib-livereload": "0.1.1",
+    "grunt-regarde": "0.1.1",
+    "grunt": "0.4.0rc8"
+  },
+  "keywords": []
+}

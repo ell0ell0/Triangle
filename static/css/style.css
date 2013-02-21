@@ -4,7 +4,7 @@ html, body {
 }
 
 canvas {
-	background: rgb(80,80,80);
+	background: #fff;
   display: block;
 	margin: 50px auto 0;
 }

@@ -167,6 +167,8 @@ Triangles.prototype.chooseColor = function(color) {
 		return oldColor;
 	}
 
+	var newColor;
+
 	do {
 		var rand = Math.round(Math.random() * (tmpColors.length - 1));
 		newColor = tmpColors[rand];
@@ -199,10 +201,6 @@ Triangles.prototype.chooseOrientation = function(orientation) {
  **/
 
 Triangles.prototype.isOnCanvas = function(inputPosX, inputPosY) {
-
-	console.log('inputPosX: ' + inputPosX + ', inputPosY: ' + inputPosY);
-	console.log('this.context.canvas.width: ' + this.context.canvas.width + ', this.context.canvas.height: ' + this.context.canvas.height);
-	console.log(this.triangleSize);
 
 	return (inputPosX > this.triangleSize && inputPosX < (this.context.canvas.width - this.triangleSize) && inputPosY > this.triangleSize && inputPosY < (this.context.canvas.height - this.triangleSize)) ? true : false;
 	
