@@ -7,8 +7,8 @@ var Triangles = function(iterations, triangleSize, positionChance, colorChance, 
 	this.currentIteration = 0;
 
 	// set as you please
-	this.iterations = iterations || 1000;
-	this.triangleSize = triangleSize || 20;
+	this.iterations = iterations || 100;
+	this.triangleSize = triangleSize || 50;
 
 	// probability of stuff happening
 	this.positionChance = positionChance || 0.1;
