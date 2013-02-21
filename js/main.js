@@ -1,9 +1,13 @@
+/**
+ *  Triangles class
+ **/
+
 var Triangles = function(iterations, triangleSize, positionChance, colorChance, orientChance) {
 
 	this.currentIteration = 0;
 
 	// set as you please
-	this.iterations = iterations || 100;
+	this.iterations = iterations || 1000;
 	this.triangleSize = triangleSize || 20;
 
 	// probability of stuff happening
@@ -20,26 +24,20 @@ var Triangles = function(iterations, triangleSize, positionChance, colorChance, 
 		{ r: 219, g: 237, b: 212, a: 0.75 }
 	];
 
-	// get context and find container widths
+	// get context and set canvas width
 	this.context = document.querySelector('#canvas').getContext('2d');
-	this.context.canvas.width  = window.innerWidth;
-	this.context.canvas.height = window.innerHeight;
-	this.containerWidth = this.containerHeight = this.context.canvas.height/2;
-	this.conX = Math.round( (this.context.canvas.width/2) - (this.containerWidth/2) );
-	this.conY = Math.round( (this.context.canvas.height/2) - (this.containerHeight/2) );
+	this.context.canvas.width  = window.innerWidth/2;
+	this.context.canvas.height = window.innerHeight/1.5;
 
 };
 
-Triangles.prototype.isInBox = function(inputPosX, inputPosY) {
-	console.log(inputPosX + ' ' + this.conX);
-	console.log(inputPosY + ' ' + this.conY);
-	if (inputPosX >= this.conX && inputPosX <= this.conX + this.containerWidth && inputPosY >= this.conY && inputPosY <= this.cony + this.containerHeight) {
-		console.log('in box');
-		return true;
-	} else {
-		console.log('not in box');
-		return false;
-	}
+
+/**
+ *  Utility function to check if point is on the canvas
+ **/
+
+Triangles.prototype.isOnCanvas = function(inputPosX, inputPosY) {
+	return (inputPosX > 0 && inputPosX < this.context.canvas.width && inputPosY > 0 && inputPosY < this.context.canvas.height) ? true : false;
 };
 
 Triangles.prototype.createTriangle = function(posX, posY, color, orientation) {
@@ -74,7 +72,7 @@ Triangles.prototype.createTriangle = function(posX, posY, color, orientation) {
 
 };
 
-Triangles.prototype.logic = function(posX, posY, color, orientation) {
+Triangles.prototype.init = function(posX, posY, color, orientation) {
 
 	var self = this,
 			newPos = this.choosePos(posX, posY),
@@ -85,14 +83,17 @@ Triangles.prototype.logic = function(posX, posY, color, orientation) {
 
 		if(newPos.x === posX && newPos.y === posY && newOrientation === orientation) {
 
-				self.logic(posX, posY, color, orientation);
+				self.init(posX, posY, color, orientation);
 
 		} else {
 
 			this.createTriangle(newPos.x, newPos.y, newColor, newOrientation);
 			this.currentIteration++;
+
 			window.setTimeout( function(){
-				self.logic(newPos.x, newPos.y, newColor, newOrientation);
+
+				self.init(newPos.x, newPos.y, newColor, newOrientation);
+
 			}, 100);
 
 		}
@@ -111,25 +112,25 @@ Triangles.prototype.choosePos = function(posX, posY) {
 		var ranDir = Math.random();
 		//move left
 		if (ranDir <= 0.25) {
-			if(this.isInBox(pos.x - diameter, pos.y)){
+			if(this.isOnCanvas(pos.x - diameter, pos.y)){
 				pos.x -= diameter;
 			}
 		}
 		//move up
 		else if(ranDir > 0.25 && ranDir <= 0.5) {
-			if(this.isInBox(pos.x, pos.y - diameter)){
+			if(this.isOnCanvas(pos.x, pos.y - diameter)){
 				pos.y -= diameter;
 			}
 		}
 		//move right
 		else if(ranDir > 0.5 && ranDir <= 0.75) {
-			if(this.isInBox(pos.x + diameter, pos.y)){
+			if(this.isOnCanvas(pos.x + diameter, pos.y)){
 				pos.x += diameter;
 			}
 		}
 		//move down
 		else if(ranDir > 0.75 && ranDir <= 1) {
-			if(this.isInBox(pos.x, pos.y + diameter)){
+			if(this.isOnCanvas(pos.x, pos.y + diameter)){
 				pos.y += diameter;
 			}
 		}
@@ -193,6 +194,6 @@ $(document).ready(function() {
 	
 	var TRIANGLES = new Triangles();
 
-	TRIANGLES.logic(200, 250, { r: 67, g: 146, b: 42, a: 0.75 }, 'right');
+	TRIANGLES.init(200, 250, { r: 67, g: 146, b: 42, a: 0.75 }, 'right');
 
 });
