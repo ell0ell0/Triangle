@@ -13,25 +13,6 @@ module.exports = function(grunt) {
     meta: {
       version: '0.1.0'
     },
-    // A silly banner.
-    banner:
-      '/*          /$$$$$$          /$$      \n' +
-      '           /$$__  $$        | $$      \n' +
-      '  /$$$$$$$| $$  )__//$$$$$$ | $$$$$$$ \n' +
-      ' /$$_____/| $$$$   /$$__  $$| $$__  $$\n' +
-      '| $$      | $$_/  | $$  ) $$| $$  ) $$\n' +
-      '| $$      | $$    | $$  | $$| $$  | $$\n' +
-      '|  $$$$$$$| $$    | $$$$$$$/| $$$$$$$/\n' +
-      ' (_______/|__/    | $$____/ |_______/ \n' +
-      '                  | $$                \n' +
-      '                  | $$                \n' +
-      '                  |__/                */\n\n' +
-      '/*! HMDAPOLIS - v<%= meta.version %> - ' +
-      '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-      '* http://consumerfinance.gov/\n' +
-      '* Copyright (c) <%= grunt.template.today("yyyy") %> ' +
-      'Consumer Financial Protection Bureau; Licensed Apache 2.0 */\n\n',
-    // Task configuration.
     jshint: {
       options: {
         curly: true,
