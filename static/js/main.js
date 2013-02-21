@@ -32,9 +32,11 @@ var Triangles = function() {
 
 Triangles.prototype.init = function(speed, iterations, triangleSize, positionChance, colorChance, orientChance) {
 
-	// set as you please
+	// ms between drawing
 	this.speed = speed || 5;
+	// number of times to draw
 	this.iterations = iterations || 100;
+	// width of triangle
 	this.triangleSize = triangleSize || 50;
 
 	// probability of stuff happening
@@ -125,14 +127,12 @@ Triangles.prototype.drawTriangle = function(posX, posY, color, orientation) {
 
 Triangles.prototype.choosePos = function(posX, posY) {
 
-	var pos = { x: posX, y: posY },
-			diameter = this.triangleSize * 2;
-
 	if (Math.random() <= this.positionChance && this.isOnCanvas(posX, posY)) {
-		return pos;
+		return { x: posX, y: posY };
 	}
 
-	var _posX, _posY;
+	var _posX, _posY,
+			diameter = this.triangleSize * 2;
 
 	do {
 		_posX = posX;
