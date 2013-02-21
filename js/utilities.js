@@ -22,10 +22,9 @@ function map(value, inputMin, inputMax, outputMin, outputMax, clamp){
 }
 
 function withinBox(posX, posY, w, h, inputPosX, inputPosY) {
-	if (inputPosX >= posX && inputPosX <= posX + w && 
-		inputPosY >= posY && inputPosY <= posY + h) {
+	if (inputPosX >= posX && inputPosX <= posX + w && inputPosY >= posY && inputPosY <= posY + h) {
 		return true;
 	} else {
-		false;
+		return false;
 	}
 }

@@ -26,8 +26,20 @@ var Triangles = function(iterations, triangleSize, positionChance, colorChance, 
 	this.context.canvas.height = window.innerHeight;
 	this.containerWidth = this.containerHeight = this.context.canvas.height/2;
 	this.conX = Math.round( (this.context.canvas.width/2) - (this.containerWidth/2) );
-	this.conX = Math.round( (this.context.canvas.height/2) - (this.containerHeight/2) );
+	this.conY = Math.round( (this.context.canvas.height/2) - (this.containerHeight/2) );
 
+};
+
+Triangles.prototype.isInBox = function(inputPosX, inputPosY) {
+	console.log(inputPosX + ' ' + this.conX);
+	console.log(inputPosY + ' ' + this.conY);
+	if (inputPosX >= this.conX && inputPosX <= this.conX + this.containerWidth && inputPosY >= this.conY && inputPosY <= this.cony + this.containerHeight) {
+		console.log('in box');
+		return true;
+	} else {
+		console.log('not in box');
+		return false;
+	}
 };
 
 Triangles.prototype.createTriangle = function(posX, posY, color, orientation) {
@@ -94,36 +106,33 @@ Triangles.prototype.choosePos = function(posX, posY) {
 			rando = Math.random();
 
 	if(rando <= this.positionChance) {
-		console.log('same position');
 		return pos;
 	} else {
 		var ranDir = Math.random();
 		//move left
 		if (ranDir <= 0.25) {
-			if(withinBox(this.conX, this.conY, this.containerWidth, this.containerHeight, pos.x - diameter, pos.y)){
+			if(this.isInBox(pos.x - diameter, pos.y)){
 				pos.x -= diameter;
 			}
 		}
 		//move up
 		else if(ranDir > 0.25 && ranDir <= 0.5) {
-			if(withinBox(this.conX, this.conY, this.containerWidth, this.containerHeight, pos.x, pos.y - diameter)){
+			if(this.isInBox(pos.x, pos.y - diameter)){
 				pos.y -= diameter;
 			}
 		}
 		//move right
 		else if(ranDir > 0.5 && ranDir <= 0.75) {
-			if(withinBox(this.conX, this.conY, this.containerWidth, this.containerHeight, pos.x + diameter, pos.y)){
+			if(this.isInBox(pos.x + diameter, pos.y)){
 				pos.x += diameter;
 			}
 		}
 		//move down
 		else if(ranDir > 0.75 && ranDir <= 1) {
-			if(withinBox(this.conX, this.conY, this.containerWidth, this.containerHeight, pos.x, pos.y + diameter)){
+			if(this.isInBox(pos.x, pos.y + diameter)){
 				pos.y += diameter;
 			}
 		}
-		console.log('new position');
-		console.log(pos);
 		return pos;
 	}
 };
@@ -184,6 +193,6 @@ $(document).ready(function() {
 	
 	var TRIANGLES = new Triangles();
 
-	TRIANGLES.logic(100, 100, { r: 67, g: 146, b: 42, a: 0.75 }, 'right');
+	TRIANGLES.logic(200, 250, { r: 67, g: 146, b: 42, a: 0.75 }, 'right');
 
 });
