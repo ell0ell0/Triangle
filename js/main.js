@@ -2,18 +2,9 @@
  *  Triangles class
  **/
 
-var Triangles = function(iterations, triangleSize, positionChance, colorChance, orientChance) {
+var Triangles = function() {
 
 	this.currentIteration = 0;
-
-	// set as you please
-	this.iterations = iterations || 100;
-	this.triangleSize = triangleSize || 50;
-
-	// probability of stuff happening
-	this.positionChance = positionChance || 0.1;
-	this.colorChance = colorChance || 0.95;
-	this.orientChance = orientChance || 0.8;
 
 	// the colors, duke, the colors
 	this.colors = [
@@ -24,8 +15,11 @@ var Triangles = function(iterations, triangleSize, positionChance, colorChance, 
 		{ r: 219, g: 237, b: 212, a: 0.75 }
 	];
 
+	// orientations
+	this.orientations = ['up', 'right', 'down', 'left'];
+
 	// get context and set canvas width
-	this.context = document.querySelector('#canvas').getContext('2d');
+	this.context = document.querySelector('canvas').getContext('2d');
 	this.context.canvas.width  = window.innerWidth/2;
 	this.context.canvas.height = window.innerHeight/1.5;
 
@@ -33,36 +27,88 @@ var Triangles = function(iterations, triangleSize, positionChance, colorChance, 
 
 
 /**
- *  Utility function to check if point is on the canvas
+ *  Initialize this mother
  **/
 
-Triangles.prototype.isOnCanvas = function(inputPosX, inputPosY) {
-	return (inputPosX > 0 && inputPosX < this.context.canvas.width && inputPosY > 0 && inputPosY < this.context.canvas.height) ? true : false;
+Triangles.prototype.init = function(speed, iterations, triangleSize, positionChance, colorChance, orientChance) {
+
+	// set as you please
+	this.speed = speed || 5;
+	this.iterations = iterations || 100;
+	this.triangleSize = triangleSize || 50;
+
+	// probability of stuff happening
+	this.positionChance = positionChance || 90/100;
+	this.colorChance = colorChance || 95/100;
+	this.orientChance = orientChance || 80/100;
+
+	var startX = Math.round( Math.random() * this.context.canvas.width ),
+			startY = Math.round( Math.random() * this.context.canvas.height );
+
+	this.loop(startX, startY, this.chooseColor(), this.chooseOrientation());
+
 };
 
-Triangles.prototype.createTriangle = function(posX, posY, color, orientation) {
+
+/**
+ *  The main loop
+ **/
+
+Triangles.prototype.loop = function(posX, posY, color, orientation) {
+
+	var self = this,
+			newPos = this.choosePos(posX, posY),
+			newColor = this.chooseColor(color),
+			newOrientation = this.chooseOrientation(orientation);
+
+	if (this.currentIteration <= this.iterations) {
+
+		if (newPos.x === posX && newPos.y === posY && newOrientation === orientation) {
+
+				self.loop(posX, posY, color, orientation);
+
+		} else {
+
+			this.drawTriangle(newPos.x, newPos.y, newColor, newOrientation);
+			this.currentIteration++;
+
+			window.setTimeout(function(){
+				self.loop(newPos.x, newPos.y, newColor, newOrientation);
+			}, self.speed);
+
+		}
+	}
+
+};
+
+
+/**
+ *  Draws a triangle given coordinates, color and orientation
+ **/
+
+Triangles.prototype.drawTriangle = function(posX, posY, color, orientation) {
 
 	this.context.save();
 	this.context.beginPath();
 
 	var size = this.triangleSize;
 
-	if(orientation == "left") {
+	if(orientation === 'up') {
+		this.context.moveTo(posX, posY);
+		this.context.lineTo( posX - size, posY - size );
+		this.context.lineTo( posX + size, posY - size );
+	} else if(orientation === 'right') {
+		this.context.moveTo(posX, posY);
+		this.context.lineTo( posX + size, posY - size );
+		this.context.lineTo( posX + size, posY + size );
+	} else if(orientation === 'down') {
+		this.context.moveTo(posX, posY);
+		this.context.lineTo( posX - size, posY + size );
+		this.context.lineTo( posX + size, posY + size );
+	} else if(orientation === 'left') {
 		this.context.moveTo( posX, posY );
 		this.context.lineTo( posX - size, posY - size );
 		this.context.lineTo( posX - size, posY + size );
-	} else if(orientation == "up") {
-		this.context.moveTo(posX, posY);
-		this.context.lineTo( posX - size, posY - size );
-		this.context.lineTo( posX + size, posY - size );
-	} else if(orientation == "right") {
-		this.context.moveTo(posX, posY);
-		this.context.lineTo( posX + size, posY - size );
-		this.context.lineTo( posX + size, posY + size );
-	} else if(orientation == "down") {
-		this.context.moveTo(posX, posY);
-		this.context.lineTo( posX - size, posY + size );
-		this.context.lineTo( posX + size, posY + size );
 	}
 
 	this.context.fillStyle = "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")";
@@ -72,128 +118,104 @@ Triangles.prototype.createTriangle = function(posX, posY, color, orientation) {
 
 };
 
-Triangles.prototype.init = function(posX, posY, color, orientation) {
 
-	var self = this,
-			newPos = this.choosePos(posX, posY),
-			newColor = this.chooseColor(color),
-			newOrientation = this.chooseOrientation(orientation);
-
-	if(this.currentIteration <= this.iterations) {
-
-		if(newPos.x === posX && newPos.y === posY && newOrientation === orientation) {
-
-				self.init(posX, posY, color, orientation);
-
-		} else {
-
-			this.createTriangle(newPos.x, newPos.y, newColor, newOrientation);
-			this.currentIteration++;
-
-			window.setTimeout( function(){
-
-				self.init(newPos.x, newPos.y, newColor, newOrientation);
-
-			}, 100);
-
-		}
-	}
-};
+/**
+ *  Returns a position next to the current position
+ **/
 
 Triangles.prototype.choosePos = function(posX, posY) {
 
 	var pos = { x: posX, y: posY },
-			diameter = this.triangleSize * 2,
-			rando = Math.random();
+			diameter = this.triangleSize * 2;
 
-	if(rando <= this.positionChance) {
-		return pos;
-	} else {
-		var ranDir = Math.random();
-		//move left
-		if (ranDir <= 0.25) {
-			if(this.isOnCanvas(pos.x - diameter, pos.y)){
-				pos.x -= diameter;
-			}
-		}
-		//move up
-		else if(ranDir > 0.25 && ranDir <= 0.5) {
-			if(this.isOnCanvas(pos.x, pos.y - diameter)){
-				pos.y -= diameter;
-			}
-		}
-		//move right
-		else if(ranDir > 0.5 && ranDir <= 0.75) {
-			if(this.isOnCanvas(pos.x + diameter, pos.y)){
-				pos.x += diameter;
-			}
-		}
-		//move down
-		else if(ranDir > 0.75 && ranDir <= 1) {
-			if(this.isOnCanvas(pos.x, pos.y + diameter)){
-				pos.y += diameter;
-			}
-		}
+	if (Math.random() <= this.positionChance && this.isOnCanvas(posX, posY)) {
 		return pos;
 	}
+
+	var _posX, _posY;
+
+	do {
+		_posX = posX;
+		_posY = posY;
+		var rand = Math.round( Math.random() * 3 ) + 1;
+		if (rand === 1) {
+			_posY -= diameter;
+		} else if (rand === 2) {
+			_posX += diameter;
+		} else if (rand === 3) {
+			_posY += diameter;
+		} else if (rand === 4) {
+			_posX -= diameter;
+		}
+	} while (!this.isOnCanvas(_posX, _posY));
+
+	return { x: _posX, y: _posY };
+	
 };
+
+
+/**
+ *  Returns a color different from the current color
+ **/
 
 Triangles.prototype.chooseColor = function(color) {
 
 	var tmpColors = this.colors.slice(0),
-			newColor = tmpColors.pop(),
-			oldColor = color;
+			oldColor = color || tmpColors[0];
 
 	if (Math.random() <= this.colorChance) {
 		return oldColor;
 	}
 
-	while (newColor === oldColor) {
-		newColor = tmpColors.pop();
+	do {
 		var rand = Math.round(Math.random() * (tmpColors.length - 1));
 		newColor = tmpColors[rand];
-	}
+	} while (newColor === oldColor);
 
 	return newColor;
 
 };
 
-Triangles.prototype.chooseOrientation = function(orientation) {
-	// var rando = Math.random();
 
-	// if(rando <= orientChance) {
-	// return orientation;
-	// } else {
-		var randOr = Math.random();
-		//left
-		if(orientation != "left" && randOr <= 0.25) {
-			return "left";
-		}
-		//up
-		else if(orientation != "up" && randOr > 0.25 && randOr <= 0.5) {
-			return "up";
-		}
-		//right
-		else if(orientation != "right" && randOr > 0.5 && randOr <= 0.75) {
-			return "right";
-		}
-		//down
-		else if(orientation != "down" && randOr > 0.75 && randOr <= 1) {
-			return "down";
-		}
-		else {
-			return orientation;
-		}
-	//}
+/**
+ *  Returns an orientation different from the current orientation
+ **/
+
+Triangles.prototype.chooseOrientation = function(orientation) {
+
+	var newOrientation;
+
+	do {
+		newOrientation = this.orientations[Math.round( Math.random() * (this.orientations.length - 1) )];
+	} while (newOrientation === orientation);
+
+	return newOrientation;
+
 };
 
 
-$(document).ready(function() {
-	//create initial seed
-	//
+/**
+ *  Utility function to check if point is on the canvas
+ **/
+
+Triangles.prototype.isOnCanvas = function(inputPosX, inputPosY) {
+
+	console.log('inputPosX: ' + inputPosX + ', inputPosY: ' + inputPosY);
+	console.log('this.context.canvas.width: ' + this.context.canvas.width + ', this.context.canvas.height: ' + this.context.canvas.height);
+	console.log(this.triangleSize);
+
+	return (inputPosX > this.triangleSize && inputPosX < (this.context.canvas.width - this.triangleSize) && inputPosY > this.triangleSize && inputPosY < (this.context.canvas.height - this.triangleSize)) ? true : false;
+	
+};
+
+
+/**
+ *  When the DOM is ready...
+ **/
+
+$(function() {
 	
 	var TRIANGLES = new Triangles();
-
-	TRIANGLES.init(200, 250, { r: 67, g: 146, b: 42, a: 0.75 }, 'right');
+	TRIANGLES.init();
 
 });
